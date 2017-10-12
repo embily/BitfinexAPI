@@ -1,9 +1,9 @@
-BitfinexAPI
+> Work in progerss... 
+
+BitfinexAPI .NET CORE 2
 ===========
 
-C# Implementation of Bitfinex trade API
-
-Author : Julien Chanaud julien.chanaud[at]supinfo[dot]com
+C# Implementation of Bitfinex trade API based on Julien Chanaud's (julien.chanaud[at]supinfo[dot]com) BitfinexAPI library (https://github.com/twobeeb/BitfinexAPI)
 
 Usage
 =====
