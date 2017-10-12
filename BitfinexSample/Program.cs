@@ -14,7 +14,7 @@ namespace BitfinexSample
         {
             Configure();
 
-            string key = Configuration["BitfinexApi_key"] + "h";
+            string key = Configuration["BitfinexApi_key"];
             string secret = Configuration["BitfinexApi_secret"];
 
             BitfinexApiV1 api = new BitfinexApiV1(key, secret);
