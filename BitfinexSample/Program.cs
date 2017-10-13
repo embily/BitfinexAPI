@@ -18,7 +18,6 @@ namespace BitfinexSample
             string secret = Configuration["BitfinexApi_secret"];
 
             BitfinexApiV1 api = new BitfinexApiV1(key, secret);
-
             BalancesResponse bal = api.GetBalances();
 
             System.Console.WriteLine($"Bal {bal.totalAvailableBTC}");

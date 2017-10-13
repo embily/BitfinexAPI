@@ -17,17 +17,12 @@ namespace BitfinexApi
 
         private string Key;
 
-        private int nonce = 0;
-
-        private string Nonce
+        public string Nonce
         {
             get
             {
-                if (nonce == 0)
-                {
-                    nonce = (int)(DateTime.UtcNow - epoch).TotalSeconds;
-                }
-                return (nonce++).ToString();
+                // not an ideal fix, why should be 1,000 multiplied (https://github.com/bitfinexcom/bitfinex-api-node/issues/111), kind of ... -- 
+                return (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000).ToString();
             }
         }
 
@@ -112,6 +107,8 @@ namespace BitfinexApi
 
         private string SendRequest(GenericRequest request, string httpMethod)
         {
+            //System.Console.WriteLine($"Nonce: {request.nonce}");
+
             string json = JsonConvert.SerializeObject(request);
             string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
             byte[] data = Encoding.UTF8.GetBytes(json64);
