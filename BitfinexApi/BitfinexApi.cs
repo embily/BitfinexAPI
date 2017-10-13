@@ -11,11 +11,9 @@ namespace BitfinexApi
 {
     public class BitfinexApiV1
     {
-        private DateTime epoch = new DateTime(1970, 1, 1);
+        private HMACSHA384 _hashMaker;
 
-        private HMACSHA384 hashMaker;
-
-        private string Key;
+        private string _key;
 
         public string Nonce
         {
@@ -28,8 +26,8 @@ namespace BitfinexApi
 
         public BitfinexApiV1(string key, string secret)
         {
-            hashMaker = new HMACSHA384(Encoding.UTF8.GetBytes(secret));
-            this.Key = key;
+            _hashMaker = new HMACSHA384(Encoding.UTF8.GetBytes(secret));
+            _key = key;
         }
 
         private String GetHexString(byte[] bytes)
@@ -112,11 +110,11 @@ namespace BitfinexApi
             string json = JsonConvert.SerializeObject(request);
             string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
             byte[] data = Encoding.UTF8.GetBytes(json64);
-            byte[] hash = hashMaker.ComputeHash(data);
+            byte[] hash = _hashMaker.ComputeHash(data);
             string signature = GetHexString(hash);
 
             HttpWebRequest wr = WebRequest.Create("https://api.bitfinex.com" + request.request) as HttpWebRequest;
-            wr.Headers.Add("X-BFX-APIKEY", Key);
+            wr.Headers.Add("X-BFX-APIKEY", _key);
             wr.Headers.Add("X-BFX-PAYLOAD", json64);
             wr.Headers.Add("X-BFX-SIGNATURE", signature);
             wr.Method = httpMethod;
