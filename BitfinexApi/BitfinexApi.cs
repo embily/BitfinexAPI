@@ -46,7 +46,7 @@ namespace BitfinexApi
 
         public async Task<SummaryResponse> SummaryAsync()
         {
-            var request = new AccountInfosRequest
+            var request = new SummaryRequest
             {
                 Request = "/v1/summary",
             };
@@ -54,6 +54,23 @@ namespace BitfinexApi
             return await SendRequestOAsync<SummaryResponse>(request);
         }
 
+        public async Task<DepositResponse> DepositAsync()
+        {
+            var request = new DepositRequest
+            {
+                Request = "/v1/deposit/new",
+                Method = "bitcoin",
+                WalletName = "exchange",
+                Renew = 1, 
+            };
+
+            var r = await SendRequestOAsync<DepositResponse>(request);
+            if(r.Result != "success")
+            {
+                throw new BitfinexException(null, r.Result);
+            }
+            return r;
+        }
 
         public BalancesResponse GetBalances()
         {

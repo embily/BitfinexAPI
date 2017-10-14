@@ -28,21 +28,21 @@ namespace BitfinexSample
             //System.Console.WriteLine($"Bal {bal.totalAvailableBTC}");
 
             // Modernized way --
-            {
-                // Account Info(s) 
-                var response = api.AccountInfosAsync().Result;
-                Console.WriteLine($"Account Info: {response}");
-                Console.WriteLine($"Account Info: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
-            }
-            {
-                // Summary 
-                var response = api.SummaryAsync().Result;
-                Console.WriteLine($"Summary: {response}");
-                Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
-            }
+            //{
+            //    // Account Info(s) 
+            //    var response = api.AccountInfosAsync().Result;
+            //    Console.WriteLine($"Account Info: {response}");
+            //    Console.WriteLine($"Account Info: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            //}
+            //{
+            //    // Summary 
+            //    var response = api.SummaryAsync().Result;
+            //    Console.WriteLine($"Summary: {response}");
+            //    Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            //}
             {
                 // Deposit 
-                var response = api.SummaryAsync().Result;
+                var response = api.DepositAsync().Result;
                 Console.WriteLine($"Deposit: {response}");
                 Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
             }
