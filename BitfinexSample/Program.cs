@@ -82,8 +82,8 @@ namespace BitfinexSample
             {
                 Currency = "BTC",
                 Method = "bitcoin",
-                Since = DateTimeOffset.UtcNow.AddDays(30).ToUnixTimeMilliseconds().ToString(),
-                Until = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
+                Since = DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds().ToString(),
+                Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 Limit = 100,
             };
 

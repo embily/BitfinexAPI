@@ -66,11 +66,11 @@ namespace BitfinexApi
             return r;
         }
 
-        public async Task<string> HistoryAsync(HistoryRequest request)
+        public async Task<HistoryResponse[]> HistoryAsync(HistoryRequest request)
         {
             request.Request = "/v1/history/movements";
 
-            var r = await SendRequestAsync(request, request.Request);
+            var r = await SendRequestAAsync<HistoryResponse>(request);
             return r;
         }
 
