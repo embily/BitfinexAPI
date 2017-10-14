@@ -15,7 +15,10 @@ namespace BitfinexSample
         {
             Configure();
 
+            // Environment Varible BitfinexApi_key, you got to set it up --
             string key = Configuration["BitfinexApi_key"];
+
+            // Environment Varible BitfinexApi_secret, you got to set it up --
             string secret = Configuration["BitfinexApi_secret"];
 
             BitfinexApiV1 api = new BitfinexApiV1(key, secret);
@@ -31,7 +34,8 @@ namespace BitfinexSample
 
         static void Configure()
         {
-
+            // Bitfinex API key and secret are stored in enviroment variables, 
+            // thus, we need access to Environment Varibles to get them --   
             var builder = new ConfigurationBuilder()
                 .AddEnvironmentVariables();
 
