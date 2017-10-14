@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 using BitfinexApi;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace BitfinexSample
 {
@@ -15,38 +16,13 @@ namespace BitfinexSample
         {
             Configure();
 
-            // Environment Varible BitfinexApi_key, you got to set it up --
-            string key = Configuration["BitfinexApi_key"];
+            // **** API Samples ***** //
 
-            // Environment Varible BitfinexApi_secret, you got to set it up --
-            string secret = Configuration["BitfinexApi_secret"];
+            AccountInfosSample().Wait();
 
-            BitfinexApiV1 api = new BitfinexApiV1(key, secret);
+            SummarySample().Wait();
 
-            // Balances - original way --
-            //BalancesResponse bal = api.GetBalances();
-            //System.Console.WriteLine($"Bal {bal.totalAvailableBTC}");
-
-            // Modernized way --
-            //{
-            //    // Account Info(s) 
-            //    var response = api.AccountInfosAsync().Result;
-            //    Console.WriteLine($"Account Info: {response}");
-            //    Console.WriteLine($"Account Info: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
-            //}
-            //{
-            //    // Summary 
-            //    var response = api.SummaryAsync().Result;
-            //    Console.WriteLine($"Summary: {response}");
-            //    Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
-            //}
-            {
-                // Deposit 
-                var response = api.DepositAsync().Result;
-                Console.WriteLine($"Deposit: {response}");
-                Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
-            }
-
+            DepositSample().Wait();
         }
 
         static void Configure()
@@ -57,6 +33,43 @@ namespace BitfinexSample
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+        }
+
+        static async Task AccountInfosSample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            var response = await api.AccountInfosAsync();
+
+            Console.WriteLine($"Account Info: {response}");
+            Console.WriteLine($"Account Info: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+        }
+
+        static async Task SummarySample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+            
+            var response = await api.SummaryAsync();
+
+            Console.WriteLine($"Summary: {response}");
+            Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+        }
+
+        static async Task DepositSample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+            
+            var request = new DepositRequest
+            {
+                Method = "bitcoin",
+                WalletName = "exchange",
+                Renew = 1,
+            };
+
+            var response = await api.DepositAsync(request);
+
+            Console.WriteLine($"Deposit: {response}");
+            Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
         }
     }
 }

@@ -8,10 +8,10 @@ namespace BitfinexApi
     public class BaseRequest
     {
         [JsonProperty("request")]
-        public string Request { get; set; }
+        internal string Request { get; set; }
 
         [JsonProperty("nonce")]
-        public string Nonce
+        internal string Nonce
         {
             get
             {

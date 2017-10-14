@@ -54,15 +54,9 @@ namespace BitfinexApi
             return await SendRequestOAsync<SummaryResponse>(request);
         }
 
-        public async Task<DepositResponse> DepositAsync()
+        public async Task<DepositResponse> DepositAsync(DepositRequest request)
         {
-            var request = new DepositRequest
-            {
-                Request = "/v1/deposit/new",
-                Method = "bitcoin",
-                WalletName = "exchange",
-                Renew = 1, 
-            };
+            request.Request = "/v1/deposit/new";
 
             var r = await SendRequestOAsync<DepositResponse>(request);
             if(r.Result != "success")
