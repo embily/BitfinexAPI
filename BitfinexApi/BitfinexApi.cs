@@ -6,11 +6,16 @@ using System.Security.Cryptography;
 using Newtonsoft.Json;
 using System.Net;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace BitfinexApi
 {
     public class BitfinexApiV1
     {
+        private const string _endpointAddress = "https://api.bitfinex.com";
+
         private HMACSHA384 _hashMaker;
 
         private string _key;
@@ -135,6 +140,52 @@ namespace BitfinexApi
                 throw new BitfinexException(ex, response);
             }
             return response;
+        }
+
+        private async Task<T> SendRequestOAsync<T>(BaseRequest request)
+        {
+            var responseBody = await SendRequesAsync(request, request.Request);
+            return JsonConvert.DeserializeObject<T>(responseBody);
+        }
+
+        private async Task<T[]> SendRequestAAsync<T>(BaseRequest request)
+        {
+            var responseBody = await SendRequesAsync(request, request.Request);
+            return JsonConvert.DeserializeObject<T[]>(responseBody);
+        }
+
+        private async Task<string> SendRequesAsync(object request, string url)
+        {
+            string json = JsonConvert.SerializeObject(request);
+            string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            byte[] data = Encoding.UTF8.GetBytes(json64);
+            byte[] hash = _hashMaker.ComputeHash(data);
+            string signature = GetHexString(hash);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using (HttpClient client = new HttpClient())
+            {
+                var headers = client.DefaultRequestHeaders;
+                headers.Add("X-BFX-APIKEY", _key);
+                headers.Add("X-BFX-PAYLOAD", json64);
+                headers.Add("X-BFX-SIGNATURE", signature);
+
+                var response = await client.PostAsync(_endpointAddress + url, content);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadAsStringAsync();
+            }
+        }
+
+        public async Task<AccountInfoResponse[]> AccountInfosAsync()
+        {
+            var request = new AccountInfosRequest
+            {
+                Request = "/v1/account_infos",
+                Nonce = Nonce,
+            };
+
+            return await SendRequestAAsync<AccountInfoResponse>(request);
         }
     }
 }
