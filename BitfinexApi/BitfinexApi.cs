@@ -182,7 +182,6 @@ namespace BitfinexApi
             var request = new AccountInfosRequest
             {
                 Request = "/v1/account_infos",
-                Nonce = Nonce,
             };
 
             return await SendRequestAAsync<AccountInfoResponse>(request);

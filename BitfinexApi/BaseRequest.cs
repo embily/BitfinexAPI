@@ -11,6 +11,14 @@ namespace BitfinexApi
         public string Request { get; set; }
 
         [JsonProperty("nonce")]
-        public string Nonce { get; set; }
+        public string Nonce
+        {
+            get
+            {
+                // not an ideal fix, why should be 1,000 multiplied (https://github.com/bitfinexcom/bitfinex-api-node/issues/111), kind of ... -- 
+                return (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000).ToString();
+            }
+            private set { }
+        }
     }
 }
