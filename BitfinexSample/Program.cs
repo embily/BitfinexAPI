@@ -18,11 +18,13 @@ namespace BitfinexSample
 
             // **** API Samples ***** //
 
-            AccountInfosSample().Wait();
+            //AccountInfosSample().Wait();
 
-            SummarySample().Wait();
+            //SummarySample().Wait();
 
-            DepositSample().Wait();
+            //DepositSample().Wait();
+
+            HistorySample().Wait();
         }
 
         static void Configure()
@@ -67,6 +69,25 @@ namespace BitfinexSample
             };
 
             var response = await api.DepositAsync(request);
+
+            Console.WriteLine($"Deposit: {response}");
+            Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+        }
+
+        static async Task HistorySample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            var request = new HistoryRequest
+            {
+                Currency = "BTC",
+                Method = "bitcoin",
+                Since = DateTimeOffset.UtcNow.AddDays(30).ToUnixTimeMilliseconds().ToString(),
+                Until = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
+                Limit = 100,
+            };
+
+            var response = await api.HistoryAsync(request);
 
             Console.WriteLine($"Deposit: {response}");
             Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");

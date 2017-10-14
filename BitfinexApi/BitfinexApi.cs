@@ -61,8 +61,16 @@ namespace BitfinexApi
             var r = await SendRequestOAsync<DepositResponse>(request);
             if(r.Result != "success")
             {
-                throw new BitfinexException(null, r.Result);
+                throw new BitfinexException(r.Result);
             }
+            return r;
+        }
+
+        public async Task<string> HistoryAsync(HistoryRequest request)
+        {
+            request.Request = "/v1/history/movements";
+
+            var r = await SendRequestAsync(request, request.Request);
             return r;
         }
 
@@ -191,9 +199,14 @@ namespace BitfinexApi
                 headers.Add("X-BFX-SIGNATURE", signature);
 
                 var response = await client.PostAsync(_endpointAddress + url, null);
-                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
 
-                return await response.Content.ReadAsStringAsync();
+                if(!response.IsSuccessStatusCode)
+                {
+                    throw new BitfinexException(response.ReasonPhrase, body);
+                }
+
+                return body;
             }
         }
 
