@@ -17,7 +17,6 @@ namespace BitfinexApi
         private const string _endpointAddress = "https://api.bitfinex.com";
 
         private HMACSHA384 _hashMaker;
-
         private string _key;
 
         public string Nonce
@@ -35,14 +34,14 @@ namespace BitfinexApi
             _key = key;
         }
 
-        private String GetHexString(byte[] bytes)
+        public async Task<AccountInfoResponse[]> AccountInfosAsync()
         {
-            StringBuilder sb = new StringBuilder(bytes.Length * 2);
-            foreach (byte b in bytes)
+            var request = new AccountInfosRequest
             {
-                sb.Append(String.Format("{0:x2}", b));
-            }
-            return sb.ToString();
+                Request = "/v1/account_infos",
+            };
+
+            return await SendRequestAAsync<AccountInfoResponse>(request);
         }
 
         public BalancesResponse GetBalances()
@@ -65,7 +64,7 @@ namespace BitfinexApi
         public CancelAllOrdersResponse CancelAllOrders()
         {
             CancelAllOrdersRequest req = new CancelAllOrdersRequest(Nonce);
-            string response = SendRequest(req, "GET");
+            string response = SendRequest(req, "GET"); // is it get??? --
             return new CancelAllOrdersResponse(response);
         }
 
@@ -110,8 +109,6 @@ namespace BitfinexApi
 
         private string SendRequest(GenericRequest request, string httpMethod)
         {
-            //System.Console.WriteLine($"Nonce: {request.nonce}");
-
             string json = JsonConvert.SerializeObject(request);
             string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
             byte[] data = Encoding.UTF8.GetBytes(json64);
@@ -141,6 +138,8 @@ namespace BitfinexApi
             }
             return response;
         }
+
+        // Modernized http calls with HttpClient, Generics, and Asyncs. I think it is a bit cooler this way -- 
 
         private async Task<T> SendRequestOAsync<T>(BaseRequest request)
         {
@@ -177,14 +176,14 @@ namespace BitfinexApi
             }
         }
 
-        public async Task<AccountInfoResponse[]> AccountInfosAsync()
+        private String GetHexString(byte[] bytes)
         {
-            var request = new AccountInfosRequest
+            StringBuilder sb = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes)
             {
-                Request = "/v1/account_infos",
-            };
-
-            return await SendRequestAAsync<AccountInfoResponse>(request);
+                sb.Append(String.Format("{0:x2}", b));
+            }
+            return sb.ToString();
         }
     }
 }
