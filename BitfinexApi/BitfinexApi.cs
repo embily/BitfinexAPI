@@ -44,10 +44,21 @@ namespace BitfinexApi
             return await SendRequestAAsync<AccountInfoResponse>(request);
         }
 
+        public async Task<SummaryResponse> SummaryAsync()
+        {
+            var request = new AccountInfosRequest
+            {
+                Request = "/v1/summary",
+            };
+
+            return await SendRequestOAsync<SummaryResponse>(request);
+        }
+
+
         public BalancesResponse GetBalances()
         {
             BalancesRequest req = new BalancesRequest(Nonce);
-            string response = SendRequest(req, "GET");
+            string response = SendRequest(req, "GET"); // is it get but it works... --
             BalancesResponse resp = BalancesResponse.FromJSON(response);
 
             return resp;
@@ -143,17 +154,17 @@ namespace BitfinexApi
 
         private async Task<T> SendRequestOAsync<T>(BaseRequest request)
         {
-            var responseBody = await SendRequesAsync(request, request.Request);
+            var responseBody = await SendRequestAsync(request, request.Request);
             return JsonConvert.DeserializeObject<T>(responseBody);
         }
 
         private async Task<T[]> SendRequestAAsync<T>(BaseRequest request)
         {
-            var responseBody = await SendRequesAsync(request, request.Request);
+            var responseBody = await SendRequestAsync(request, request.Request);
             return JsonConvert.DeserializeObject<T[]>(responseBody);
         }
 
-        private async Task<string> SendRequesAsync(object request, string url)
+        private async Task<string> SendRequestAsync(object request, string url)
         {
             string json = JsonConvert.SerializeObject(request);
             string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
