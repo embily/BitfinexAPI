@@ -40,6 +40,12 @@ namespace BitfinexSample
                 Console.WriteLine($"Summary: {response}");
                 Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
             }
+            {
+                // Deposit 
+                var response = api.SummaryAsync().Result;
+                Console.WriteLine($"Deposit: {response}");
+                Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            }
 
         }
 

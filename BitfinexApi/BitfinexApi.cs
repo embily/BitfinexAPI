@@ -171,7 +171,6 @@ namespace BitfinexApi
             byte[] data = Encoding.UTF8.GetBytes(json64);
             byte[] hash = _hashMaker.ComputeHash(data);
             string signature = GetHexString(hash);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             using (HttpClient client = new HttpClient())
             {
@@ -180,7 +179,7 @@ namespace BitfinexApi
                 headers.Add("X-BFX-PAYLOAD", json64);
                 headers.Add("X-BFX-SIGNATURE", signature);
 
-                var response = await client.PostAsync(_endpointAddress + url, content);
+                var response = await client.PostAsync(_endpointAddress + url, null);
                 response.EnsureSuccessStatusCode();
 
                 return await response.Content.ReadAsStringAsync();
