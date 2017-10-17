@@ -146,7 +146,7 @@ namespace BitfinexApi
             string signature = GetHexString(hash);
 
             HttpWebRequest wr = WebRequest.Create("https://api.bitfinex.com" + request.request) as HttpWebRequest;
-            wr.Headers.Add("X-BFX-APIKEY", _key);
+            wr.Headers.Add("X-BFX-APIKEY", _key); // Is this displaying the API key in clear text?
             wr.Headers.Add("X-BFX-PAYLOAD", json64);
             wr.Headers.Add("X-BFX-SIGNATURE", signature);
             wr.Method = httpMethod;
