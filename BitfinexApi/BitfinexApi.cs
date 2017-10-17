@@ -170,7 +170,6 @@ namespace BitfinexApi
         }
 
         // Modernized http calls with HttpClient, Generics, and Asyncs. I think it is a bit cooler this way -- 
-
         private async Task<T> SendRequestOAsync<T>(BaseRequest request)
         {
             var responseBody = await SendRequestAsync(request, request.Request);
