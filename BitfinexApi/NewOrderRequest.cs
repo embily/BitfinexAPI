@@ -2,80 +2,167 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
+using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using Newtonsoft.Json.Converters;
+using System.ComponentModel;
 
 namespace BitfinexApi
 {
-    public enum OrderType
+    /// <summary>
+    /// The name of the symbol (see /symbols).
+    /// </summary>
+    public enum OrderSymbols
     {
-        MarginMarket,
-        MarginLimit,
-        MarginStop,
-        MarginTrailingStop
-    }
-    public enum OrderSide
-    {
-        Buy,
-        Sell
-    }
-    public enum OrderExchange
-    {
-        Bitfinex,
-        Bitstamp,
-        All
-    }
-    public enum OrderSymbol
-    {
+        [EnumMember(Value = "btcusd")]
         BTCUSD
     }
-    public class NewOrderRequest:GenericRequest
+
+    /// <summary>
+    /// type starting by "exchange " are exchange orders, others are margin trading orders
+    /// </summary>
+    public enum OrderTypes
     {
-        public string symbol;
-        public string amount;
-        public string price;
-        public string exchange;
-        public string side;
-        public string type;
-        //public bool is_hidden=false;
-        public NewOrderRequest(string nonce, OrderSymbol symbol, decimal amount, decimal price, OrderExchange exchange, OrderSide side, OrderType type)
-        {
-            this.symbol = EnumHelper.EnumToStr(symbol);
-            this.amount = amount.ToString(CultureInfo.InvariantCulture);
-            this.price = price.ToString(CultureInfo.InvariantCulture);
-            this.exchange = EnumHelper.EnumToStr(exchange);
-            this.side = EnumHelper.EnumToStr(side);
-            this.type = EnumHelper.EnumToStr(type);
-            this.nonce = nonce;
-            this.request = "/v1/order/new";
-        }
+        [EnumMember(Value = "market")]
+        Market,
+
+        [EnumMember(Value = "limit")]
+        Limit,
+
+        [EnumMember(Value = "stop")]
+        Stop,
+
+        [EnumMember(Value = "trailing-stop")]
+        TrailingStop,
+
+        [EnumMember(Value = "fill-or-kill")]
+        FillOrKill,
+
+        [EnumMember(Value = "exchange market")]
+        ExchangeMarket,
+
+        [EnumMember(Value = "exchange limit")]
+        ExchangeLimit,
+
+        [EnumMember(Value = "exchange stop")]
+        ExchangeStop,
+
+        [EnumMember(Value = "exchange trailing-stop")]
+        ExchangeTrailingStop,
+
+        [EnumMember(Value = "exchange fill-or-kill")]
+        ExchangeFillOrKill
     }
-    public class EnumHelper
+
+    public enum OrderSides
     {
-        private static Dictionary<object, string> enumStr = null;
-        private static Dictionary<object, string> Get()
-        {
-            if (enumStr == null)
-            {
-                enumStr = new Dictionary<object, string>();
-                enumStr.Add(OrderSymbol.BTCUSD, "btcusd");
+        [EnumMember(Value = "buy")]
+        Buy,
 
-                enumStr.Add(OrderExchange.All, "all");
-                enumStr.Add(OrderExchange.Bitfinex, "bitfinex");
-                enumStr.Add(OrderExchange.Bitstamp, "bitstamp");
+        [EnumMember(Value = "sell")]
+        Sell
+    }
 
-                enumStr.Add(OrderSide.Buy, "buy");
-                enumStr.Add(OrderSide.Sell, "sell");
+    public enum OrderExchanges
+    {
+        [EnumMember(Value = "bitfinex")]
+        Bitfinex,
 
-                enumStr.Add(OrderType.MarginLimit, "limit");
-                enumStr.Add(OrderType.MarginMarket, "market");
-                enumStr.Add(OrderType.MarginStop, "stop");
-                enumStr.Add(OrderType.MarginTrailingStop, "trailing-stop");
-            }
-            return enumStr;
-        }
+        [EnumMember(Value = "bitstamp")]
+        Bitstamp,
 
-        public static string EnumToStr(object enumItem)
-        {
-            return Get()[enumItem];
-        }
+        [EnumMember(Value = "all")]
+        All
+    }
+
+    public class NewOrderRequest : BaseRequest
+    {
+        /// <summary>
+        /// The name of the symbol (see /symbols).
+        /// see: https://docs.bitfinex.com/v1/reference#rest-public-symbols
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("symbol")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderSymbols Symbol { get; set; }
+
+        /// <summary>
+        /// Order size: how much you want to buy or sell
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("amount")]
+        public string Amount { get; set; }
+
+        /// <summary>
+        /// Price to buy or sell at. Must be positive. Use random number for market orders.
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("price")]
+        public string Price { get; set; }
+
+        /// <summary>
+        /// Either “buy” or “sell”.
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("side")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderSides Side { get; set; }
+
+        /// <summary>
+        /// Either “market” / “limit” / “stop” / “trailing-stop” / “fill-or-kill” / “exchange market” / 
+        /// “exchange limit” / “exchange stop” / “exchange trailing-stop” / “exchange fill-or-kill”. 
+        /// (type starting by “exchange ” are exchange orders, others are margin trading orders)
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderTypes Type { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [JsonProperty("exchange")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public OrderExchanges Exchange { get; set; }
+
+        /// <summary>
+        /// true if the order should be hidden.
+        /// </summary>
+        [JsonProperty("is_hidden")]
+        public bool IsHidden { get; set; }
+
+        /// <summary>
+        /// true if the order should be post only. Only relevant for limit orders.
+        /// </summary>
+        [JsonProperty("is_postonly")]
+        public bool IsPostonly { get; set; }
+
+        /// <summary>
+        /// 1 will post an order that will use all of your available balance.
+        /// </summary>
+        [JsonProperty("use_all_available")]
+        public int UseAllAvailable { get; set; }
+
+        /// <summary>
+        /// Set an additional STOP OCO order that will be linked with the current order.
+        /// </summary>
+        [JsonRequired]
+        [JsonProperty("ocoorder")]
+        public bool Ocoorder { get; set; }
+
+        /// <summary>
+        /// If ocoorder is true, this field represent the price of the OCO stop order to place
+        /// </summary>
+        [JsonProperty("buy_price_oco")]
+        public string BuyPriceOco { get; set; }
+
+        /// <summary>
+        /// If ocoorder is true, this field represent the price of the OCO stop order to place
+        /// </summary>
+        //[JsonRequired]
+        //[DefaultValue(null)]
+        //[JsonProperty("sell_price_oco", DefaultValueHandling = DefaultValueHandling.Populate)]
+        [JsonProperty("sell_price_oco")]
+        public string SellPriceOco { get; set; }
     }
 }

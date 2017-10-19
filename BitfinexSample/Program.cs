@@ -17,6 +17,7 @@ namespace BitfinexSample
             Configure();
 
             // **** API Samples ***** //
+            // uncomment the desired one! 
 
             //AccountInfosSample().Wait();
 
@@ -24,7 +25,9 @@ namespace BitfinexSample
 
             //DepositSample().Wait();
 
-            HistorySample().Wait();
+            //HistorySample().Wait();
+
+            NewOrderAndOrderStatusSample().Wait();
         }
 
         static void Configure()
@@ -43,18 +46,16 @@ namespace BitfinexSample
 
             var response = await api.AccountInfosAsync();
 
-            Console.WriteLine($"Account Info: {response}");
-            Console.WriteLine($"Account Info: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            LogResponse(response);
         }
 
         static async Task SummarySample()
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
-            
+
             var response = await api.SummaryAsync();
 
-            Console.WriteLine($"Summary: {response}");
-            Console.WriteLine($"Summary: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            LogResponse(response);
         }
 
         static async Task DepositSample()
@@ -68,10 +69,11 @@ namespace BitfinexSample
                 Renew = 1,
             };
 
+            LogRequest(request);
+
             var response = await api.DepositAsync(request);
 
-            Console.WriteLine($"Deposit: {response}");
-            Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            LogResponse(response);
         }
 
         static async Task HistorySample()
@@ -87,10 +89,71 @@ namespace BitfinexSample
                 Limit = 100,
             };
 
+            LogRequest(request);
+
             var response = await api.HistoryAsync(request);
 
-            Console.WriteLine($"Deposit: {response}");
-            Console.WriteLine($"Deposit: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
+            LogResponse(response);
+        }
+
+        static async Task NewOrderAndOrderStatusSample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            var request = new NewOrderRequest
+            {
+                Symbol = OrderSymbols.BTCUSD,
+                Amount = 0.005.ToString(),
+                // Price to buy or sell at. Must be positive. Use random number for market orders.
+                Price = new Random().NextDouble().ToString(),
+                Side = OrderSides.Sell,
+                Type = OrderTypes.ExchangeMarket,
+            };
+
+            LogRequest(request);
+
+            var response = await api.NewOrderAsync(request);
+
+            LogResponse(response);
+
+            long orderId = response.OrderId;
+            //long orderId = 4454427931;
+
+            Retry.Do(() => { OrderStatusSample(orderId).Wait(); }, TimeSpan.FromSeconds(3));
+        }
+
+        static async Task OrderStatusSample(long orderId)
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            var request = new OrderStatusRequest
+            {
+                OrderId = orderId
+            };
+
+            LogRequest(request);
+
+            var response = await api.OrderStatusAsync(request);
+
+            LogResponse(response);
+
+            if(response.IsLive)
+            {
+                throw new ApplicationException("Order is still being executed. Waiting for completion.");
+            }
+
+        }
+
+        private static void LogRequest(BaseRequest request)
+        {
+            Console.WriteLine($"Request: {request}");
+            Console.WriteLine($"Request: {JsonConvert.SerializeObject(request, Formatting.Indented)}");
+        }
+
+        private static void LogResponse(object response)
+        {
+            Console.WriteLine($"Response: {response}");
+            Console.WriteLine($"Respose: {JsonConvert.SerializeObject(response, Formatting.Indented)}");
         }
     }
 }

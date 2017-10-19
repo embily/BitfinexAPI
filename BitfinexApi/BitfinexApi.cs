@@ -74,102 +74,21 @@ namespace BitfinexApi
             return r;
         }
 
-        public BalancesResponse GetBalances()
+        public async Task<NewOrderResponse> NewOrderAsync(NewOrderRequest request)
         {
-            BalancesRequest req = new BalancesRequest(Nonce);
-            string response = SendRequest(req, "GET"); // is it get but it works... --
-            BalancesResponse resp = BalancesResponse.FromJSON(response);
+            request.Request = "/v1/order/new";
 
-            return resp;
+            var r = await SendRequestOAsync<NewOrderResponse>(request);
+            return r;
         }
 
-        public CancelOrderResponse CancelOrder(int order_id)
+        public async Task<OrderStatusResponse> OrderStatusAsync(OrderStatusRequest request)
         {
-            CancelOrderRequest req = new CancelOrderRequest(Nonce, order_id);
-            string response = SendRequest(req, "POST");
-            CancelOrderResponse resp = CancelOrderResponse.FromJSON(response);
-            return resp;
+            request.Request = "/v1/order/status";
+
+            var r = await SendRequestOAsync<OrderStatusResponse>(request);
+            return r;
         }
-
-        public CancelAllOrdersResponse CancelAllOrders()
-        {
-            CancelAllOrdersRequest req = new CancelAllOrdersRequest(Nonce);
-            string response = SendRequest(req, "GET"); // is it get??? --
-            return new CancelAllOrdersResponse(response);
-        }
-
-        public OrderStatusResponse GetOrderStatus(int order_id)
-        {
-            OrderStatusRequest req = new OrderStatusRequest(Nonce, order_id);
-            string response = SendRequest(req, "POST");
-            return OrderStatusResponse.FromJSON(response);
-        }
-
-        public ActiveOrdersResponse GetActiveOrders()
-        {
-            ActiveOrdersRequest req = new ActiveOrdersRequest(Nonce);
-            string response = SendRequest(req, "POST");
-            return ActiveOrdersResponse.FromJSON(response);
-        }
-
-        public ActivePositionsResponse GetActivePositions()
-        {
-            ActivePositionsRequest req = new ActivePositionsRequest(Nonce);
-            string response = SendRequest(req, "POST");
-            return ActivePositionsResponse.FromJSON(response);
-        }
-
-        public NewOrderResponse ExecuteBuyOrderBTC(decimal amount, decimal price, OrderExchange exchange, OrderType type)
-        {
-            return ExecuteOrder(OrderSymbol.BTCUSD, amount, price, exchange, OrderSide.Buy, type);
-        }
-
-        public NewOrderResponse ExecuteSellOrderBTC(decimal amount, decimal price, OrderExchange exchange, OrderType type)
-        {
-            return ExecuteOrder(OrderSymbol.BTCUSD, amount, price, exchange, OrderSide.Sell, type);
-        }
-
-        public NewOrderResponse ExecuteOrder(OrderSymbol symbol, decimal amount, decimal price, OrderExchange exchange, OrderSide side, OrderType type)
-        {
-            NewOrderRequest req = new NewOrderRequest(Nonce, symbol, amount, price, exchange, side, type);
-            string response = SendRequest(req, "POST");
-            NewOrderResponse resp = NewOrderResponse.FromJSON(response);
-            return resp;
-        }
-
-        private string SendRequest(GenericRequest request, string httpMethod)
-        {
-            string json = JsonConvert.SerializeObject(request);
-            string json64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
-            byte[] data = Encoding.UTF8.GetBytes(json64);
-            byte[] hash = _hashMaker.ComputeHash(data);
-            string signature = GetHexString(hash);
-
-            HttpWebRequest wr = WebRequest.Create("https://api.bitfinex.com" + request.request) as HttpWebRequest;
-            wr.Headers.Add("X-BFX-APIKEY", _key);
-            wr.Headers.Add("X-BFX-PAYLOAD", json64);
-            wr.Headers.Add("X-BFX-SIGNATURE", signature);
-            wr.Method = httpMethod;
-
-            string response = null;
-            try
-            {
-                HttpWebResponse resp = wr.GetResponse() as HttpWebResponse;
-                StreamReader sr = new StreamReader(resp.GetResponseStream());
-                response = sr.ReadToEnd();
-                sr.Close();
-            }
-            catch (WebException ex)
-            {
-                StreamReader sr = new StreamReader(ex.Response.GetResponseStream());
-                response = sr.ReadToEnd();
-                sr.Close();
-                throw new BitfinexException(ex, response);
-            }
-            return response;
-        }
-
-        // Modernized http calls with HttpClient, Generics, and Asyncs. I think it is a bit cooler this way -- 
 
         private async Task<T> SendRequestOAsync<T>(BaseRequest request)
         {
@@ -200,6 +119,9 @@ namespace BitfinexApi
 
                 var response = await client.PostAsync(_endpointAddress + url, null);
                 var body = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"Response Body Raw:");
+                Console.WriteLine($"{body}");
 
                 if(!response.IsSuccessStatusCode)
                 {
