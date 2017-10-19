@@ -117,7 +117,6 @@ namespace BitfinexSample
             LogResponse(response);
 
             long orderId = response.OrderId;
-            //long orderId = 4454427931;
 
             Retry.Do(() => { OrderStatusSample(orderId).Wait(); }, TimeSpan.FromSeconds(3));
         }
