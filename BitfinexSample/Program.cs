@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 
 using BitfinexApi;
@@ -27,8 +28,11 @@ namespace BitfinexSample
 
             //HistorySample().Wait();
 
-            NewOrderAndOrderStatusSample().Wait();
+            //NewOrderAndOrderStatusSample().Wait();
+
+            FindTransactionByCryptoAddress().Wait();
         }
+
 
         static void Configure()
         {
@@ -142,6 +146,37 @@ namespace BitfinexSample
             }
 
         }
+
+        static async Task FindTransactionByCryptoAddress()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            string addressToLookFor = "136SoCiRDkRvM8EhK6xT6KoSEdkwgkrc8g";
+
+            var request = new HistoryRequest
+            {
+                Currency = "BTC",
+                Method = "bitcoin",
+                Since = DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds().ToString(),
+                Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
+                Limit = 100,
+            };
+
+            LogRequest(request);
+
+            var response = await api.HistoryAsync(request);
+
+            LogResponse(response);
+
+            var item = response.First(t => t.Address == addressToLookFor);
+
+            double expectedAmount = 0.01851848;
+
+            Console.WriteLine("################## Result ################");
+            Console.WriteLine($"Expected: Address: {addressToLookFor}, Amount: {expectedAmount} BTC");
+            Console.WriteLine($"Actual: Address: {item.Address}, Amount {item.Amount} {item.Currency}, Fee: {item.Fee}, type: {item.Type}");
+        }
+
 
         private static void LogRequest(BaseRequest request)
         {
