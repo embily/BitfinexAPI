@@ -17,6 +17,9 @@ namespace BitfinexSample
         {
             Configure();
 
+            // TODO: implement check of minumal positions, useful for testing --
+            // https://api.bitfinex.com/v1/symbols_details 
+
             // **** API Samples ***** //
             // uncomment the desired one! 
 
@@ -28,9 +31,11 @@ namespace BitfinexSample
 
             //HistorySample().Wait();
 
+            PastTradesSample().Wait();
+
             //NewOrderAndOrderStatusSample().Wait();
 
-            FindTransactionByCryptoAddress().Wait();
+            //FindTransactionByCryptoAddress().Wait();
         }
 
 
@@ -107,7 +112,7 @@ namespace BitfinexSample
             var request = new NewOrderRequest
             {
                 Symbol = OrderSymbols.BTCUSD,
-                Amount = 0.005.ToString(),
+                Amount = 0.004.ToString(),
                 // Price to buy or sell at. Must be positive. Use random number for market orders.
                 Price = new Random().NextDouble().ToString(),
                 Side = OrderSides.Sell,
@@ -122,7 +127,7 @@ namespace BitfinexSample
 
             long orderId = response.OrderId;
 
-            Retry.Do(() => { OrderStatusSample(orderId).Wait(); }, TimeSpan.FromSeconds(3));
+            Retry.Do(() => { OrderStatusSample(orderId).Wait(); }, TimeSpan.FromSeconds(5));
         }
 
         static async Task OrderStatusSample(long orderId)
@@ -177,6 +182,25 @@ namespace BitfinexSample
             Console.WriteLine($"Actual: Address: {item.Address}, Amount {item.Amount} {item.Currency}, Fee: {item.Fee}, type: {item.Type}");
         }
 
+        static async Task PastTradesSample()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            var request = new PastTradesRequest
+            {
+                Symbol = "BTCUSD",
+                Timestamp = DateTimeOffset.Now.AddDays(-1).ToUnixTimeSeconds().ToString(),
+                Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
+                LimitTrades = 100,
+                Reverse = 0,
+            };
+
+            LogRequest(request);
+
+            var response = await api.PastTradesAsync(request);
+
+            LogResponse(response);
+        }
 
         private static void LogRequest(BaseRequest request)
         {

@@ -90,6 +90,14 @@ namespace BitfinexApi
             return r;
         }
 
+        public async Task<PastTradesResponse[]> PastTradesAsync(PastTradesRequest request)
+        {
+            request.Request = "/v1/mytrades";
+
+            var r = await SendRequestAAsync<PastTradesResponse>(request);
+            return r;
+        }
+
         private async Task<T> SendRequestOAsync<T>(BaseRequest request)
         {
             var responseBody = await SendRequestAsync(request, request.Request);
