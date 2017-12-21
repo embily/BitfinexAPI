@@ -189,9 +189,9 @@ namespace BitfinexSample
             var request = new PastTradesRequest
             {
                 Symbol = "BTCUSD",
-                Timestamp = DateTimeOffset.Now.AddDays(-1).ToUnixTimeSeconds().ToString(),
+                Timestamp = DateTimeOffset.Now.AddDays(-3).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
-                LimitTrades = 100,
+                LimitTrades = 2,
                 Reverse = 0,
             };
 

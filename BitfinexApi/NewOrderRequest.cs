@@ -15,7 +15,13 @@ namespace BitfinexApi
     public enum OrderSymbols
     {
         [EnumMember(Value = "btcusd")]
-        BTCUSD
+        BTCUSD,
+
+        [EnumMember(Value = "ltcusd")]
+        LTCUSD,
+
+        [EnumMember(Value = "ethusd")]
+        ETHUSD,
     }
 
     /// <summary>
@@ -80,6 +86,7 @@ namespace BitfinexApi
         /// <summary>
         /// The name of the symbol (see /symbols).
         /// see: https://docs.bitfinex.com/v1/reference#rest-public-symbols
+        /// and: https://api.bitfinex.com/v1/symbols
         /// </summary>
         [JsonRequired]
         [JsonProperty("symbol")]
