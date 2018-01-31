@@ -17,25 +17,27 @@ namespace BitfinexSample
         {
             Configure();
 
-            // TODO: implement check of minumal positions, useful for testing --
+            // TODO: implement check of minimal positions, useful for testing --
             // https://api.bitfinex.com/v1/symbols_details 
 
             // **** API Samples ***** //
-            // uncomment the desired one! 
+            // uncomment the desired API! 
 
             //AccountInfosSample().Wait();
 
             //SummarySample().Wait();
-
-            //DepositSample().Wait();
-
+            
             //HistorySample().Wait();
 
-            PastTradesSample().Wait();
+            //PastTradesSample().Wait();
 
             //NewOrderAndOrderStatusSample().Wait();
 
+            FindTransactionByTxnId().Wait();
+
             //FindTransactionByCryptoAddress().Wait();
+
+            //DepositSample().Wait();
         }
 
 
@@ -71,6 +73,7 @@ namespace BitfinexSample
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
             
+            // Attention !!! there is a limit on number of new address per account!!! --
             var request = new DepositRequest
             {
                 Method = "bitcoin",
@@ -93,7 +96,7 @@ namespace BitfinexSample
             {
                 Currency = "BTC",
                 Method = "bitcoin",
-                Since = DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds().ToString(),
+                Since = DateTimeOffset.Now.AddDays(-1).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 Limit = 100,
             };
@@ -101,6 +104,12 @@ namespace BitfinexSample
             LogRequest(request);
 
             var response = await api.HistoryAsync(request);
+
+            foreach(var r in response)
+            {
+                r.Timestamp = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(Convert.ToDouble(r.Timestamp))).ToString();
+                r.TimestampCreated = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(Convert.ToDouble(r.TimestampCreated))).ToString();
+            }
 
             LogResponse(response);
         }
@@ -156,7 +165,7 @@ namespace BitfinexSample
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
 
-            string addressToLookFor = "136SoCiRDkRvM8EhK6xT6KoSEdkwgkrc8g";
+            string addressToLookFor = "<address>";
 
             var request = new HistoryRequest
             {
@@ -181,6 +190,37 @@ namespace BitfinexSample
             Console.WriteLine($"Expected: Address: {addressToLookFor}, Amount: {expectedAmount} BTC");
             Console.WriteLine($"Actual: Address: {item.Address}, Amount {item.Amount} {item.Currency}, Fee: {item.Fee}, type: {item.Type}");
         }
+
+        static async Task FindTransactionByTxnId()
+        {
+            var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
+
+            string txnId = "<txnId>";
+
+            var request = new HistoryRequest
+            {
+                Currency = "BTC",
+                Method = "bitcoin",
+                Since = DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds().ToString(),
+                Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
+                Limit = 100,
+            };
+
+            LogRequest(request);
+
+            var response = await api.HistoryAsync(request);
+
+            LogResponse(response);
+
+            var item = response.First(t => t.Txid == txnId);
+
+            double expectedAmount = 0.0;
+
+            Console.WriteLine("################## Result ################");
+            Console.WriteLine($"Expected: TxnId: {txnId}, Amount: {expectedAmount} BTC");
+            Console.WriteLine($"Actual: TxnId: {item.Txid}, Amount {item.Amount} {item.Currency}, Fee: {item.Fee}, type: {item.Type}");
+        }
+
 
         static async Task PastTradesSample()
         {
