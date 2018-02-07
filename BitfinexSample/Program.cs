@@ -26,14 +26,16 @@ namespace BitfinexSample
             //AccountInfosSample().Wait();
 
             //SummarySample().Wait();
-            
-            //HistorySample().Wait();
 
-            //PastTradesSample().Wait();
+            HistorySampleBTC().Wait();
+            HistorySampleLTC().Wait();
+
+            PastTradesSampleBTCUSD().Wait();
+            PastTradesSampleLTCUSD().Wait();
 
             //NewOrderAndOrderStatusSample().Wait();
 
-            FindTransactionByTxnId().Wait();
+            //FindTransactionByTxnId().Wait();
 
             //FindTransactionByCryptoAddress().Wait();
 
@@ -72,7 +74,7 @@ namespace BitfinexSample
         static async Task DepositSample()
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
-            
+
             // Attention !!! there is a limit on number of new address per account!!! --
             var request = new DepositRequest
             {
@@ -88,14 +90,24 @@ namespace BitfinexSample
             LogResponse(response);
         }
 
-        static async Task HistorySample()
+        static async Task HistorySampleBTC()
+        {
+            await HistorySample("BTC", "bitcoin");
+        }
+
+        static async Task HistorySampleLTC()
+        {
+            await HistorySample("LTC", "litecoin");
+        }
+
+        static async Task HistorySample(string currency, string method)
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
 
             var request = new HistoryRequest
             {
-                Currency = "BTC",
-                Method = "bitcoin",
+                Currency = currency,
+                Method = method,
                 Since = DateTimeOffset.Now.AddDays(-1).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 Limit = 100,
@@ -105,7 +117,7 @@ namespace BitfinexSample
 
             var response = await api.HistoryAsync(request);
 
-            foreach(var r in response)
+            foreach (var r in response)
             {
                 r.Timestamp = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(Convert.ToDouble(r.Timestamp))).ToString();
                 r.TimestampCreated = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(Convert.ToDouble(r.TimestampCreated))).ToString();
@@ -154,7 +166,7 @@ namespace BitfinexSample
 
             LogResponse(response);
 
-            if(response.IsLive)
+            if (response.IsLive)
             {
                 throw new ApplicationException("Order is still being executed. Waiting for completion.");
             }
@@ -221,14 +233,24 @@ namespace BitfinexSample
             Console.WriteLine($"Actual: TxnId: {item.Txid}, Amount {item.Amount} {item.Currency}, Fee: {item.Fee}, type: {item.Type}");
         }
 
+        static async Task PastTradesSampleLTCUSD()
+        {
+            await PastTradesSample("LTCUSD");
 
-        static async Task PastTradesSample()
+        }
+
+        static async Task PastTradesSampleBTCUSD()
+        {
+            await PastTradesSample("BTCUSD");
+        }
+
+        static async Task PastTradesSample(string symbol)
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
 
             var request = new PastTradesRequest
             {
-                Symbol = "BTCUSD",
+                Symbol = symbol,
                 Timestamp = DateTimeOffset.Now.AddDays(-3).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 LimitTrades = 2,
