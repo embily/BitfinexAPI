@@ -17,11 +17,20 @@ namespace BitfinexApi
         [EnumMember(Value = "btcusd")]
         BTCUSD,
 
+        [EnumMember(Value = "btceur")]
+        BTCEUR,
+
         [EnumMember(Value = "ltcusd")]
         LTCUSD,
 
+        [EnumMember(Value = "ltceur")]
+        LTCEUR,
+
         [EnumMember(Value = "ethusd")]
         ETHUSD,
+
+        [EnumMember(Value = "etheur")]
+        ETHEUR,
     }
 
     /// <summary>
