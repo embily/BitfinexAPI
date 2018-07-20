@@ -27,11 +27,14 @@ namespace BitfinexSample
 
             //SummarySample().Wait();
 
-            HistorySampleBTC().Wait();
-            HistorySampleLTC().Wait();
+            //HistorySampleBTC().Wait();
+            //HistorySampleLTC().Wait();
+
+            OrderStatusSample(12248636228).Wait();
 
             PastTradesSampleBTCUSD().Wait();
-            PastTradesSampleLTCUSD().Wait();
+
+            //PastTradesSampleLTCUSD().Wait();
 
             //NewOrderAndOrderStatusSample().Wait();
 
@@ -108,7 +111,7 @@ namespace BitfinexSample
             {
                 Currency = currency,
                 Method = method,
-                Since = DateTimeOffset.Now.AddDays(-1).ToUnixTimeSeconds().ToString(),
+                Since = DateTimeOffset.Now.AddDays(-3).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 Limit = 100,
             };
@@ -151,6 +154,7 @@ namespace BitfinexSample
             Retry.Do(() => { OrderStatusSample(orderId).Wait(); }, TimeSpan.FromSeconds(5));
         }
 
+
         static async Task OrderStatusSample(long orderId)
         {
             var api = new BitfinexApiV1(Configuration["BitfinexApi_key"], Configuration["BitfinexApi_secret"]);
@@ -183,7 +187,7 @@ namespace BitfinexSample
             {
                 Currency = "BTC",
                 Method = "bitcoin",
-                Since = DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds().ToString(),
+                Since = DateTimeOffset.Now.AddDays(-3).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
                 Limit = 100,
             };
@@ -253,7 +257,7 @@ namespace BitfinexSample
                 Symbol = symbol,
                 Timestamp = DateTimeOffset.Now.AddDays(-3).ToUnixTimeSeconds().ToString(),
                 Until = DateTimeOffset.Now.AddDays(1).ToUnixTimeSeconds().ToString(),
-                LimitTrades = 2,
+                LimitTrades = 100,
                 Reverse = 0,
             };
 
